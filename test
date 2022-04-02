@@ -1,0 +1,98 @@
+import tkinter
+import tkinter.messagebox
+import random
+import threading
+import itertools
+import time
+
+root = tkinter.Tk()
+# 窗口标题
+root.title('随机提问')
+# 窗口初始大小和位置
+#root.geometry('260x180+400+300')
+screenwidth = root.winfo_screenwidth()
+screenheight = root.winfo_screenheight()
+size_geo = '%dx%d+%d+%d' % (400, 300, (screenwidth-400)/2, (screenheight-300)/2)
+root.geometry(size_geo)
+# 不允许改变窗口大小
+root.resizable(False, False)
+
+# 关闭程序时执行的函数代码，停止滚动显示学生名单
+def closeWindow():
+    root.flag = False
+    time.sleep(0.1)
+    root.destroy()
+root.protocol('WM_DELETE_WINDOW', closeWindow)
+
+# 模拟学生名单，可以加上数据库访问接口，从数据库中读取学生名单
+students = ['孙乾', '简雍', '糜竺', '糜芳', '庞统', '法正', '许靖', '马良', '徐庶', '陈震', '杨仪', '费祎', '蒋琬', '孟优', '黄皓', '关羽', '张飞', '马超', '黄忠', '赵云', '魏延', '关平', '周仓', '关兴', '张苞', '陈到', '李严', '姜维', '廖化', '马谡', '马岱', '陈式', '雷铜', '吴兰', '王平', '任夔', '张翼', '马忠', '张南', '冯习', '傅佥', '关索']
+# 变量，用来控制是否滚动显示学生名单
+root.flag = False
+
+def switch():
+    root.flag = True
+    # 随机打乱学生名单
+    t = students[:]
+    random.shuffle(t)
+    t = itertools.cycle(t)
+    
+    while root.flag:        
+        # 滚动显示
+        Another1['text'] = lbFirst['text']
+        lbFirst['text'] = lbSecond['text']        
+        lbSecond['text'] = lbThird['text']
+        lbThird['text'] = Another2['text']
+        Another2['text'] = next(t)
+        
+        # 数字可以修改，控制滚动速度
+        time.sleep(0.1)
+        
+def btnStartClick():
+    # 每次单击“开始”按钮启动新线程
+    t = threading.Thread(target=switch)
+    t.start()
+    btnStart['state'] = 'disabled'
+    btnStop['state'] = 'normal'
+btnStart = tkinter.Button(root,
+                          text='开始',
+                          command=btnStartClick)
+btnStart.place(x=100, y=30, width=80, height=20)
+
+def btnStopClick():
+    # 单击“停”按钮结束滚动显示
+    root.flag = False
+    time.sleep(0.3)
+    tkinter.messagebox.showinfo('恭喜',
+                                '本次中奖：'+lbFirst['text']+' '+lbSecond['text']+' '+lbThird['text'])
+    btnStart['state'] = 'normal'
+    btnStop['state'] = 'disabled'
+btnStop = tkinter.Button(root,
+                         text='停',
+                         command=btnStopClick)
+btnStop['state'] = 'disabled'
+btnStop.place(x=210, y=30, width=80, height=20)
+
+# 用来滚动显示学生名单的3个Label组件
+# 可以根据需要进行添加，但要修改上面的线程函数代码
+# 额外添加两个
+Another1 = tkinter.Label(root, text='')
+Another1.place(x=150, y=80, width=100, height=20)
+
+lbFirst = tkinter.Label(root, text='')
+lbFirst['fg'] = 'red'
+lbFirst.place(x=150, y=110, width=100, height=20)
+
+# 红色Label组件，表示中奖名单
+lbSecond = tkinter.Label(root, text='')
+lbSecond['fg'] = 'red'
+lbSecond.place(x=150, y=140, width=100, height=20)
+
+lbThird = tkinter.Label(root, text='')
+lbThird['fg'] = 'red'
+lbThird.place(x=150, y=170, width=100, height=20)
+
+Another2 = tkinter.Label(root, text='')
+Another2.place(x=150, y=200, width=100, height=20)
+
+# 启动tkinter主程序
+root.mainloop()
